@@ -5,6 +5,7 @@ namespace Omnibill\Pennylane;
 use Omnibill\Exception\InvalidKeyException;
 use Omnibill\Exception\ProviderException;
 use Omnibill\Http\Answer;
+use Omnisense\Contracts\Policy\Backoff;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -26,6 +27,7 @@ final class Api
         #[\SensitiveParameter] private readonly string $token,
         public readonly string $url = self::URL,
         private readonly ?string $companyId = null,
+        private readonly ?Backoff $backoff = null,
     ) {
     }
 
@@ -104,7 +106,7 @@ final class Api
     private function call(string $method, string $path, array $options): array
     {
         $options['headers'] = ['Authorization' => 'Bearer '.$this->token, 'Accept' => 'application/json'] + (null !== $this->companyId ? ['X-Company-Id' => $this->companyId] : []);
-        $answer = Answer::send($this->http, self::PROVIDER, $method, $this->url.$path, $options);
+        $answer = Answer::send($this->http, self::PROVIDER, $method, $this->url.$path, $options, $this->backoff);
         if (\in_array($answer->status, [401, 403], true)) {
             throw new InvalidKeyException(self::PROVIDER, \sprintf('The token was refused (HTTP %d): %s', $answer->status, self::error($answer)), (string) $answer->status);
         }

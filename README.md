@@ -21,6 +21,13 @@ verified in real: no account.**
 use only); an integration that serves several Pennylane customers needs **API Partner** status and
 an OAuth app from Pennylane - see [the docs](docs/index.md#terms).
 
+## Usage policy
+
+`policy.json`, read on 2026-11-10 in Pennylane's [API contract terms](https://pennylane.readme.io/page/api-contract-terms)
+and [rate-limiting guide](https://pennylane.readme.io/docs/rate-limiting-1): 25 requests every 5
+seconds per token, internal business use, storage only as the integration needs, redistribution
+forbidden. A 429 and its `retry-after` (or `ratelimit-reset`) hold the gateway's next calls.
+
 ## Responsibility
 
 This package is an independent, unofficial client: it is not affiliated with, endorsed by or

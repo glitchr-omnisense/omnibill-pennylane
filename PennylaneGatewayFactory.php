@@ -12,6 +12,8 @@ use Omnibill\Pennylane\Action\ListContactsAction;
 use Omnibill\Pennylane\Action\ListEntriesAction;
 use Omnibill\Pennylane\Action\PostEntryAction;
 use Omnibill\Pennylane\Action\SaveContactAction;
+use Omnisense\Contracts\Policy\LegacyReset;
+use Omnisense\Contracts\Policy\UsagePolicy;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -26,6 +28,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class PennylaneGatewayFactory extends GatewayFactory
 {
+    private static ?UsagePolicy $policy = null;
+
     public function __construct(private readonly ?HttpClientInterface $http = null)
     {
     }
@@ -48,6 +52,12 @@ final class PennylaneGatewayFactory extends GatewayFactory
         );
     }
 
+    /** Its usage policy, as policy.json declares it (read once). */
+    public static function usagePolicy(): UsagePolicy
+    {
+        return self::$policy ??= UsagePolicy::fromFile(__DIR__.'/policy.json');
+    }
+
     protected function populateConfig(Config $config): void
     {
         $config->defaults([
@@ -56,12 +66,14 @@ final class PennylaneGatewayFactory extends GatewayFactory
             'omnibill.required_options' => ['token'],
             'company_id' => null,
             'url' => null,
-            'omnibill.capabilities' => new Capabilities([], approved: false, publicSector: false, contracts: [Capabilities::JOURNAL_ENTRIES, Capabilities::CONTACTS], terms: self::terms()),
+            'omnibill.capabilities' => new Capabilities([], approved: false, publicSector: false, contracts: [Capabilities::JOURNAL_ENTRIES, Capabilities::CONTACTS], terms: self::terms(), policy: self::usagePolicy()),
             'omnibill.api' => fn (Config $c) => new Api(
                 $this->http ?? HttpClient::create(),
                 self::text($c['token']),
                 rtrim('' !== ($url = self::text($c->get('url'))) ? $url : Api::URL, '/'),
                 '' !== ($company = self::text($c->get('company_id'))) ? $company : null,
+                // ratelimit-reset is a Unix time: read with the other fields, a 429's wait when retry-after is missing.
+                $c->backoff()?->withLegacyHeaders(LegacyReset::Epoch),
             ),
             'omnibill.action.post_entry' => new PostEntryAction(),
             'omnibill.action.fetch_entry' => new FetchEntryAction(),

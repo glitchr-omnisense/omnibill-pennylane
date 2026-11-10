@@ -1,0 +1,35 @@
+{
+    "$schema": "https://github.com/glitchr-omnisense/contracts/blob/1.x/resources/usage-policy.schema.json",
+    "provider": "pennylane",
+    "rateLimits": [
+        {
+            "max": 25,
+            "window": "second",
+            "every": 5,
+            "scope": "key",
+            "note": "25 requests every 5 seconds per token (a developer token, or each token of an OAuth app), every endpoint, production and sandbox alike; a 429 carries retry-after, every answer ratelimit-limit, -remaining and -reset (a Unix time)"
+        }
+    ],
+    "rights": {
+        "commercial": "allowed",
+        "openSourceRequired": null,
+        "caching": {
+            "permission": "unknown"
+        },
+        "storage": "contract",
+        "redistribution": "forbidden",
+        "attribution": {
+            "required": false
+        }
+    },
+    "requirements": {
+        "key": true
+    },
+    "provenance": {
+        "terms": "https://pennylane.readme.io/page/api-contract-terms",
+        "policy": "https://pennylane.readme.io/docs/rate-limiting-1",
+        "notes": "Commercial: the licence is for the company's own internal business purposes (contract terms 2.1); an integration serving several Pennylane customers needs API Partner status and an OAuth app from Pennylane (2.1 d, 3.1). Storage declared as 'contract': no copy or database of the data beyond what the intended integration needs (3.4 p), data returned or deleted on termination as users instruct (9.5). Redistribution, resale and sublicensing of the API forbidden (3.4 f); no competing service, no suggested affiliation (3.4 m, o); Pennylane may set and change limits at its discretion (3.4 c, 3.5) and is granted a licence over the integrations (4.3). No attribution required. Price: no API price in the terms; a company API token needs Pennylane's Essential plan or above. Caching: the terms set no duration.",
+        "verifiedAt": "2026-11-10",
+        "declaredBy": "maintainer"
+    }
+}
