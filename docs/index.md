@@ -54,6 +54,7 @@ Tokens go by reference (`%env(PENNYLANE_TOKEN)%`).
 |---|---|
 | `postEntry()` | `GET /journals` (the journal by `code`), `GET /ledger_accounts` per account (`number eq`; where Pennylane has one account per VAT rate under a number - 706000 at FR_200, at FR_100 - the one whose `vat_rate` is the line's VAT: `FR_200` for 20 %, `exempt`), then `POST /ledger_entries`: `date`, `label`, `journal_id`, `currency`, `piece_number`, `ledger_entry_lines` with `debit` and `credit` as decimal strings (`"100.00"`), `ledger_account_id`, `label` |
 | `fetchEntry()` | `GET /ledger_entries/{id}` (its lines on `ledger_account.number`, in Pennylane's order, which is not guaranteed) and `GET /journals` for the code |
+| `findEntry()` | since omnibill 1.2: `GET /ledger_entries` filtered by `date eq` and `journal_id eq`, `sort=id`, every page; the entry whose `label` is the entry's and, with a piece, whose `piece_number` is it - the earliest. Pennylane keeps no key of the application's on a ledger entry: `POST /ledger_entries` takes `date`, `due_date`, `label`, `journal_id`, `file_attachment_id`, `currency`, `piece_number`, `ledger_entry_lines` and nothing else (no `external_reference`, no idempotency key), and its list filters on `id`, `date`, `journal_id` only (the Company API v2 reference, read 2026-11-11). An entry without a piece is recognised by its date, journal and label |
 | `entries()` | `GET /ledger_entries` filtered by `date gteq`/`lteq` and `journal_id eq`, `sort=-date`, Pennylane's cursor |
 | `saveContact()` | a customer: `POST /company_customers` (`name`, `vat_number`, `reg_no`: the SIREN), or for a person `POST /individual_customers` (`first_name`, `last_name`: the name split at its first space) - `billing_address` required; a supplier: `POST /suppliers` (`name`, `reg_no`, `establishment_no`: the SIRET, `vat_number`, `iban`, `postal_address`). Both: `emails`, `external_reference` (the key), `ledger_account.number` (the auxiliary account). `PUT` on the same path with the reference |
 | `fetchContact()` | `GET /customers/{id}` or `/suppliers/{id}` |
@@ -96,7 +97,8 @@ seconds per token (a 429 is an `UnreachableException`; `retry-after` says when).
 | 401, 403 | `InvalidKeyException` (`The access token is invalid`, a missing scope) |
 | other 4xx (`Entry lines are not balanced`, a missing field) | `ProviderException` (`error`, `message`, `field` read whichever shape came; `providerCode` the `code` when given) |
 | a journal or ledger account not found; a customer without a billing address | `ProviderException` (`not_found`); `InvalidConfigException`, before the call |
-| 429, 5xx, no answer | `UnreachableException` |
+| a 5xx or a timeout to `POST`/`PUT` (an entry, a contact; an OAuth token refresh, which consumes the refresh token) | `OutcomeUnknownException` (an `UnreachableException`): `findEntry()` before posting again |
+| 429, 5xx, no answer to a `GET`; a host that did not resolve | `UnreachableException` |
 
 ## Example in Symfony
 

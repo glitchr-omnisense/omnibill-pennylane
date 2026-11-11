@@ -4,6 +4,7 @@ namespace Omnibill\Pennylane\Tests;
 
 use Omnibill\Exception\InvalidConfigException;
 use Omnibill\Exception\InvalidKeyException;
+use Omnibill\Exception\OutcomeUnknownException;
 use Omnibill\Exception\ProviderException;
 use Omnibill\Gateway;
 use Omnibill\Model\Address;
@@ -186,6 +187,24 @@ final class PennylaneGatewayTest extends TestCase
         self::assertSame(['GET', self::URL.'/customers?limit=10&filter=[{"field":"name","operator":"start_with","value":"Cam"}]'], \array_slice($this->call(0), 0, 2));
         self::assertSame([['2201', 'lease-42']], array_map(static fn ($c) => [$c->reference, $c->key], $list->contacts));
         self::assertNull($list->cursor);
+    }
+
+    public function testAnEntryWhoseOutcomeIsUnknownIsRecognisedByWhatItCarries(): void
+    {
+        try {
+            $this->gateway(['journals', 'accounts-615', 'accounts-44566', 'accounts-401EDF', 'error-503:503'])->postEntry(self::bill());
+            self::fail();
+        } catch (OutcomeUnknownException $e) {
+            self::assertSame('503', $e->providerCode, 'POST /ledger_entries may have been taken: not posted again blindly');
+        }
+
+        $this->calls = [];
+        $gateway = $this->gateway(['journals', 'entries-day', 'journals', 'entries-day']);
+        $found = $gateway->findEntry(self::bill());
+        self::assertSame(['GET', self::URL.'/ledger_entries?sort=id&limit=100&filter=[{"field":"date","operator":"eq","value":"2026-11-10"},{"field":"journal_id","operator":"eq","value":8002}]'], \array_slice($this->call(1), 0, 2));
+        self::assertSame(['610042', 'EDF-2026-11', 'bill:edf-2026-11'], [$found?->reference, $found?->number, $found?->key]);
+        $other = new JournalEntry('AC', new \DateTimeImmutable('2026-11-10'), 'Électricité novembre', [], 'EDF-2026-11B', 'bill:edf-2026-11b');
+        self::assertNull($gateway->findEntry($other), 'the same label, another piece');
     }
 
     public function testErrors(): void
