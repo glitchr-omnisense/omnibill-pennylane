@@ -12,6 +12,7 @@ $books = (new PennylaneGatewayFactory($httpClient))->create(['token' => getenv('
 
 $entry = $books->postEntry($journalEntry);   // POST /ledger_entries on the journal and accounts found by code and number
 $books->saveContact($supplier);              // POST /suppliers
+$books->findContact($supplier);              // after an OutcomeUnknownException: by its external_reference, or null
 ```
 
 Written from Pennylane's API reference, guides and API contract terms, read on 2026-11-10. **Not

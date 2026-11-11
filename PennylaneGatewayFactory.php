@@ -8,6 +8,7 @@ use Omnibill\Model\Capabilities;
 use Omnibill\Model\Terms;
 use Omnibill\Pennylane\Action\FetchContactAction;
 use Omnibill\Pennylane\Action\FetchEntryAction;
+use Omnibill\Pennylane\Action\FindContactAction;
 use Omnibill\Pennylane\Action\FindEntryAction;
 use Omnibill\Pennylane\Action\ListContactsAction;
 use Omnibill\Pennylane\Action\ListEntriesAction;
@@ -83,6 +84,7 @@ final class PennylaneGatewayFactory extends GatewayFactory
             'omnibill.action.save_contact' => new SaveContactAction(),
             'omnibill.action.fetch_contact' => new FetchContactAction(),
             'omnibill.action.list_contacts' => new ListContactsAction(),
+            'omnibill.action.find_contact' => new FindContactAction(),
         ]);
     }
 

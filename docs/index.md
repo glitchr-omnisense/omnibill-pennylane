@@ -59,6 +59,7 @@ Tokens go by reference (`%env(PENNYLANE_TOKEN)%`).
 | `saveContact()` | a customer: `POST /company_customers` (`name`, `vat_number`, `reg_no`: the SIREN), or for a person `POST /individual_customers` (`first_name`, `last_name`: the name split at its first space) - `billing_address` required; a supplier: `POST /suppliers` (`name`, `reg_no`, `establishment_no`: the SIRET, `vat_number`, `iban`, `postal_address`). Both: `emails`, `external_reference` (the key), `ledger_account.number` (the auxiliary account). `PUT` on the same path with the reference |
 | `fetchContact()` | `GET /customers/{id}` or `/suppliers/{id}` |
 | `contacts()` | `GET /customers` or `/suppliers`, `name start_with`, Pennylane's cursor |
+| `findContact()` | since omnibill 1.3: `GET /suppliers` or `/customers` (by the contact's kind) filtered by `external_reference eq` the key `saveContact()` sent, `limit` 100; the one whose `external_reference` is the key, `null` when none. Both lists filter on `external_reference` (the Company API v2 reference, read 2026-11-11). A contact without a key: `InvalidConfigException` (Pennylane gives one of its own to a contact created without) |
 
 | Pennylane `status` | `EntryStatus` |
 |---|---|
