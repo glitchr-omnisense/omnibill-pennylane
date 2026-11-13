@@ -22,6 +22,14 @@ verified in real: no account.**
 use only); an integration that serves several Pennylane customers needs **API Partner** status and
 an OAuth app from Pennylane - see [the docs](docs/index.md#terms).
 
+## Install
+
+```sh
+composer require omnibill/pennylane
+```
+
+It brings the family's core, `omnisense/omnibill`, and `omnisense/contracts` with it. **A Pennylane company API token, or a partner app's OAuth token, is needed.** The tests run on recorded answers.
+
 ## Usage policy
 
 `policy.json`, read on 2026-11-10 in Pennylane's [API contract terms](https://pennylane.readme.io/page/api-contract-terms)
